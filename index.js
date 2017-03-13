@@ -1,6 +1,7 @@
 'use strict';
 
 const Hapi = require('hapi');
+const Boom = require('boom');
 
 const server = new Hapi.Server();
 server.connection({
@@ -9,7 +10,13 @@ server.connection({
 });
 
 function handler(request, reply) {
-    reply(request.params);
+    // hapi automatically makes assumptions about the content-type header based on what I put in the reply
+    // examples below:
+    // reply('hello hapi');
+    // reply({hello: 'hapi'});
+    // reply(require('fs').createReadStream(__filename));
+    // reply(new Error('oops'));
+    reply(Boom.notFound());
 }
 
 let goodOptions = {
