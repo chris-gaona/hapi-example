@@ -33,8 +33,8 @@ server.register({
         return console.error(err);
     }
 
-    // use a ? to make the parameter optional
-    // use
+    // use a ? (ie /{userId?}) to make the parameter optional
+    // use a wildcard * (ie /{userId*} to make the paramater match anything. userId will contain the entire wildcard url
     server.route({
         method: 'GET',
         path: '/users/{userId?}',
