@@ -42,50 +42,85 @@ let goodOptions = {
     }
 };
 
-server.register(require('vision'), () => {
-   server.views({
-       engines: {
-           hbs: require('handlebars')
-       },
-       relativeTo: __dirname,
-       layout: true,
-       path: 'views'
-   });
-
-   server.route({
-       method: 'GET',
-       path: '/{name?}',
-       handler: function (request, reply) {
-           reply.view('home', {
-               name: request.params.name || 'World'
-           });
-       }
-   })
+server.route({
+    method: ['POST', 'PUT'],
+    path: '/',
+    config: {
+      payload: {
+          output: 'data',
+          // hapi automatically parses data; defaults to true
+          parse: true,
+          // only allow the following
+          allow: 'application/json'
+      }
+    },
+    handler: function (request, reply) {
+       reply(request.payload);
+    }
 });
 
-// serve static files
-server.register(require('inert'), () => {
-    server.route({
-        method: 'GET',
-        path: '/{param*}',
-        handler: {
-            directory: {
-                path: Path.join(__dirname, 'public')
-            }
-        }
-    });
+server.start((err) => {
+    if (err) {
+        throw err;
+    }
 
-    server.start((err) => {
-        if (err) {
-            throw err;
-        }
-
-        console.log(`Started at: ${server.info.uri}`)
-    });
+    console.log(`Started at: ${server.info.uri}`)
 });
 
+// // creates view engine with vision (handlebars)
+// server.register(require('vision'), () => {
+//    server.views({
+//        engines: {
+//            hbs: require('handlebars')
+//        },
+//        relativeTo: __dirname,
+//        layout: true,
+//        path: 'views'
+//    });
+//
+//    server.route({
+//        method: 'GET',
+//        path: '/{name?}',
+//        handler: function (request, reply) {
+//            reply.view('home', {
+//                name: request.params.name || 'World'
+//            });
+//        }
+//    });
+//
+//     server.start((err) => {
+//         if (err) {
+//             throw err;
+//         }
+//
+//         console.log(`Started at: ${server.info.uri}`)
+//     });
+// });
+
+// // serve static files
+// server.register(require('inert'), () => {
+//     server.route({
+//         method: 'GET',
+//         path: '/{param*}',
+//         handler: {
+//             directory: {
+//                 path: Path.join(__dirname, 'public')
+//             }
+//         }
+//     });
+//
+//     server.start((err) => {
+//         if (err) {
+//             throw err;
+//         }
+//
+//         console.log(`Started at: ${server.info.uri}`)
+//     });
+// });
+
+// // uses good module to add console reporting
 // server.register({
-//     register: [require('inert'), require('good')],
+//     register: require('good'),
 //     options: goodOptions
 // }, err => {
 //     if (err) {
