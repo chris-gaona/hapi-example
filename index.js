@@ -42,104 +42,116 @@ let goodOptions = {
     }
 };
 
-// lifecycle extension events are registered in the following way:
-// first argument is event name
-// second arguments is the function to be executed for the event
-server.ext('onRequest', (request, reply) => {
-    // passes on to the route handler
-    reply.continue();
-});
-
-server.ext('onRequest', (request, reply) => {
-    request.setUrl('/')
-    request.setMethod('GET')
-    reply.continue()
-})
-
-server.ext('onRequest', (request, reply) => {
-    console.log('onRequest')
-    reply.continue()
-})
-
-server.ext('onPreAuth', (request, reply) => {
-    console.log('onPreAuth')
-    reply.continue()
-})
-
-server.ext('onPostAuth', (request, reply) => {
-    console.log('onPostAuth')
-    reply.continue()
-})
-
-server.ext('onPreHandler', (request, reply) => {
-    console.log('onPreHandler')
-    reply.continue()
-})
-
-server.ext('onPostHandler', (request, reply) => {
-    console.log('onPostHandler')
-    reply.continue()
-})
-
-server.ext('onPreResponse', (request, reply) => {
-    console.log('onPreResponse')
-    reply.continue()
-})
-
-server.route({
-    method: ['POST', 'PUT'],
-    path: '/',
-    config: {
-      payload: {
-          output: 'data',
-          // hapi automatically parses data; defaults to true
-          parse: true,
-          // only allow the following
-          allow: 'application/json'
-      }
-    },
-    handler: function (request, reply) {
-       reply(request.payload);
-    }
-});
-
-server.start((err) => {
-    if (err) {
-        throw err;
-    }
-
-    console.log(`Started at: ${server.info.uri}`)
-});
-
-// // creates view engine with vision (handlebars)
-// server.register(require('vision'), () => {
-//    server.views({
-//        engines: {
-//            hbs: require('handlebars')
-//        },
-//        relativeTo: __dirname,
-//        layout: true,
-//        path: 'views'
-//    });
-//
-//    server.route({
-//        method: 'GET',
-//        path: '/{name?}',
-//        handler: function (request, reply) {
-//            reply.view('home', {
-//                name: request.params.name || 'World'
-//            });
-//        }
-//    });
-//
-//     server.start((err) => {
-//         if (err) {
-//             throw err;
-//         }
-//
-//         console.log(`Started at: ${server.info.uri}`)
-//     });
+// // lifecycle extension events are registered in the following way:
+// // first argument is event name
+// // second arguments is the function to be executed for the event
+// server.ext('onRequest', (request, reply) => {
+//     // passes on to the route handler
+//     reply.continue();
 // });
+//
+// server.ext('onRequest', (request, reply) => {
+//     request.setUrl('/')
+//     request.setMethod('GET')
+//     reply.continue()
+// })
+//
+// server.ext('onRequest', (request, reply) => {
+//     console.log('onRequest')
+//     reply.continue()
+// })
+//
+// server.ext('onPreAuth', (request, reply) => {
+//     console.log('onPreAuth')
+//     reply.continue()
+// })
+//
+// server.ext('onPostAuth', (request, reply) => {
+//     console.log('onPostAuth')
+//     reply.continue()
+// })
+//
+// server.ext('onPreHandler', (request, reply) => {
+//     console.log('onPreHandler')
+//     reply.continue()
+// })
+//
+// server.ext('onPostHandler', (request, reply) => {
+//     console.log('onPostHandler')
+//     reply.continue()
+// })
+//
+// server.ext('onPreResponse', (request, reply) => {
+//     console.log('onPreResponse')
+//     reply.continue()
+// })
+
+// server.route({
+//     method: ['POST', 'PUT'],
+//     path: '/',
+//     config: {
+//       payload: {
+//           output: 'data',
+//           // hapi automatically parses data; defaults to true
+//           parse: true,
+//           // only allow the following
+//           allow: 'application/json'
+//       }
+//     },
+//     handler: function (request, reply) {
+//        reply(request.payload);
+//     }
+// });
+//
+// server.start((err) => {
+//     if (err) {
+//         throw err;
+//     }
+//
+//     console.log(`Started at: ${server.info.uri}`)
+// });
+
+// creates view engine with vision (handlebars)
+server.register(require('vision'), () => {
+   server.views({
+       engines: {
+           hbs: require('handlebars')
+       },
+       relativeTo: __dirname,
+       layout: true,
+       path: 'views'
+   });
+
+   // this extension will watch for any errors
+   server.ext('onPreResponse', (request, reply) => {
+       let resp = request.response;
+       // if response is error of any kind Hapi will convert to Boom object with isBoom as true
+       if (!resp.isBoom) return reply.continue();
+
+       // gives template access to error code and error message
+       reply.view('error', resp.output.payload)
+           .code(resp.output.statusCode);
+   });
+
+   server.route({
+       method: 'GET',
+       path: '/{name?}',
+       handler: function (request, reply) {
+           reply(Boom.badRequest());
+           // reply.view('home', {
+           //     name: request.params.name || 'World'
+           // });
+       }
+   });
+
+    server.start((err) => {
+        if (err) {
+            throw err;
+        }
+
+        console.log(`Started at: ${server.info.uri}`)
+    });
+});
 
 // // serve static files
 // server.register(require('inert'), () => {
