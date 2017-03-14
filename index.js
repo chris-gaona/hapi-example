@@ -112,65 +112,94 @@ let goodOptions = {
 //     console.log(`Started at: ${server.info.uri}`)
 // });
 
-// creates view engine with vision (handlebars)
-server.register(require('vision'), () => {
-   server.views({
-       engines: {
-           hbs: require('handlebars')
-       },
-       relativeTo: __dirname,
-       layout: true,
-       path: 'views'
-   });
-
-   // this extension will watch for any errors
-   server.ext('onPreResponse', (request, reply) => {
-       let resp = request.response;
-       // if response is error of any kind Hapi will convert to Boom object with isBoom as true
-       if (!resp.isBoom) return reply.continue();
-
-       // gives template access to error code and error message
-       reply.view('error', resp.output.payload)
-           .code(resp.output.statusCode);
-   });
-
-   server.route({
-       method: 'GET',
-       path: '/{name?}',
-       // uses Joi module for validation
-       validate: {
-           // expects params to be an object
-           params: Joi.object({
-               // expects id to be a number
-               id: Joi.number()
-           }),
-           // expects payload to be an object
-           // add unknown function to not cause errors if another key/value is on payload that is not specified here
-           payload: Joi.object({
-               id: Joi.number(),
-               email: Joi.string()
-           }).unknown(),
-           // add validation to query
-           query: Joi.object({
-               id: Joi.number()
-           })
-       },
-       handler: function (request, reply) {
-           reply(Boom.badRequest());
-           // reply.view('home', {
-           //     name: request.params.name || 'World'
-           // });
-       }
-   });
-
-    server.start((err) => {
-        if (err) {
-            throw err;
-        }
-
-        console.log(`Started at: ${server.info.uri}`)
-    });
+// add cookie to multiple routes
+server.state('hello', {
+    ttl: 60 * 60 * 1000,
+    isHttpOnly: true,
+    encoding: 'iron',
+    password: 'longencryptedcookiesdfwfwefwefwfwfwefaraefawefawefawegaweg'
 });
+
+server.route({
+    method: 'GET',
+    path: '/',
+    config: {
+        handler: function (request, reply) {
+            let hello = request.state.hello;
+            // adds cookies to route's response
+            reply(`Cookies ${hello}`)
+                .state('hello', 'world')
+        }
+    }
+});
+
+server.start((err) => {
+    if (err) {
+        throw err;
+    }
+
+    console.log(`Started at: ${server.info.uri}`)
+});
+
+// // creates view engine with vision (handlebars)
+// server.register(require('vision'), () => {
+//    server.views({
+//        engines: {
+//            hbs: require('handlebars')
+//        },
+//        relativeTo: __dirname,
+//        layout: true,
+//        path: 'views'
+//    });
+//
+//    // this extension will watch for any errors
+//    server.ext('onPreResponse', (request, reply) => {
+//        let resp = request.response;
+//        // if response is error of any kind Hapi will convert to Boom object with isBoom as true
+//        if (!resp.isBoom) return reply.continue();
+//
+//        // gives template access to error code and error message
+//        reply.view('error', resp.output.payload)
+//            .code(resp.output.statusCode);
+//    });
+//
+//    server.route({
+//        method: 'GET',
+//        path: '/{name?}',
+//        // uses Joi module for validation
+//        validate: {
+//            // expects params to be an object
+//            params: Joi.object({
+//                // expects id to be a number
+//                id: Joi.number()
+//            }),
+//            // expects payload to be an object
+//            // add unknown function to not cause errors if another key/value is on payload that is not specified here
+//            payload: Joi.object({
+//                id: Joi.number(),
+//                email: Joi.string()
+//            }).unknown(),
+//            // add validation to query
+//            query: Joi.object({
+//                id: Joi.number()
+//            })
+//        },
+//        handler: function (request, reply) {
+//            reply(Boom.badRequest());
+//            // reply.view('home', {
+//            //     name: request.params.name || 'World'
+//            // });
+//        }
+//    });
+//
+//     server.start((err) => {
+//         if (err) {
+//             throw err;
+//         }
+//
+//         console.log(`Started at: ${server.info.uri}`)
+//     });
+// });
 
 // // serve static files
 // server.register(require('inert'), () => {
