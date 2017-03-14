@@ -42,6 +42,27 @@ let goodOptions = {
     }
 };
 
+server.register(require('vision'), () => {
+   server.views({
+       engines: {
+           hbs: require('handlebars')
+       },
+       relativeTo: __dirname,
+       layout: true,
+       path: 'views'
+   });
+
+   server.route({
+       method: 'GET',
+       path: '/{name?}',
+       handler: function (request, reply) {
+           reply.view('home', {
+               name: request.params.name || 'World'
+           });
+       }
+   })
+});
+
 // serve static files
 server.register(require('inert'), () => {
     server.route({
