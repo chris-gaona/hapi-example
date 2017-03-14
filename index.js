@@ -2,6 +2,7 @@
 
 const Hapi = require('hapi');
 const Boom = require('boom');
+const Path = require('path');
 
 const server = new Hapi.Server();
 server.connection({
@@ -41,21 +42,48 @@ let goodOptions = {
     }
 };
 
-server.register({
-    register: require('good'),
-    options: goodOptions
-}, err => {
-    if (err) {
-        return console.error(err);
-    }
-
-    // use a ? (ie /{userId?}) to make the parameter optional
-    // use a wildcard * (ie /{userId*} to make the paramater match anything. userId will contain the entire wildcard url
+// serve static files
+server.register(require('inert'), () => {
     server.route({
         method: 'GET',
-        path: '/users/{userId?}',
-        handler: handler
+        path: '/{param*}',
+        handler: {
+            directory: {
+                path: Path.join(__dirname, 'public')
+            }
+        }
     });
 
-    server.start(() => console.log(`Started at: ${server.info.uri}`));
+    server.start((err) => {
+        if (err) {
+            throw err;
+        }
+
+        console.log(`Started at: ${server.info.uri}`)
+    });
 });
+
+// server.register({
+//     register: [require('inert'), require('good')],
+//     options: goodOptions
+// }, err => {
+//     if (err) {
+//         return console.error(err);
+//     }
+//
+//     // use a ? (ie /{userId?}) to make the parameter optional
+//     // use a wildcard * (ie /{userId*} to make the paramater match anything. userId will contain the entire wildcard url
+//     server.route({
+//         method: 'GET',
+//         path: '/users/{userId?}',
+//         handler: handler
+//     });
+//
+//     server.start((err) => {
+//         if (err) {
+//             throw err;
+//         }
+//
+//         console.log(`Started at: ${server.info.uri}`)
+//     });
+// });
