@@ -3,6 +3,7 @@
 const Hapi = require('hapi');
 const Boom = require('boom');
 const Path = require('path');
+const Joi = require('joi');
 
 const server = new Hapi.Server();
 server.connection({
@@ -136,6 +137,24 @@ server.register(require('vision'), () => {
    server.route({
        method: 'GET',
        path: '/{name?}',
+       // uses Joi module for validation
+       validate: {
+           // expects params to be an object
+           params: Joi.object({
+               // expects id to be a number
+               id: Joi.number()
+           }),
+           // expects payload to be an object
+           // add unknown function to not cause errors if another key/value is on payload that is not specified here
+           payload: Joi.object({
+               id: Joi.number(),
+               email: Joi.string()
+           }).unknown(),
+           // add validation to query
+           query: Joi.object({
+               id: Joi.number()
+           })
+       },
        handler: function (request, reply) {
            reply(Boom.badRequest());
            // reply.view('home', {
