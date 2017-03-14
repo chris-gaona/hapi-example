@@ -42,6 +42,50 @@ let goodOptions = {
     }
 };
 
+// lifecycle extension events are registered in the following way:
+// first argument is event name
+// second arguments is the function to be executed for the event
+server.ext('onRequest', (request, reply) => {
+    // passes on to the route handler
+    reply.continue();
+});
+
+server.ext('onRequest', (request, reply) => {
+    request.setUrl('/')
+    request.setMethod('GET')
+    reply.continue()
+})
+
+server.ext('onRequest', (request, reply) => {
+    console.log('onRequest')
+    reply.continue()
+})
+
+server.ext('onPreAuth', (request, reply) => {
+    console.log('onPreAuth')
+    reply.continue()
+})
+
+server.ext('onPostAuth', (request, reply) => {
+    console.log('onPostAuth')
+    reply.continue()
+})
+
+server.ext('onPreHandler', (request, reply) => {
+    console.log('onPreHandler')
+    reply.continue()
+})
+
+server.ext('onPostHandler', (request, reply) => {
+    console.log('onPostHandler')
+    reply.continue()
+})
+
+server.ext('onPreResponse', (request, reply) => {
+    console.log('onPreResponse')
+    reply.continue()
+})
+
 server.route({
     method: ['POST', 'PUT'],
     path: '/',
