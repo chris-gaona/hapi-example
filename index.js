@@ -16,7 +16,16 @@ function handler(request, reply) {
     // reply({hello: 'hapi'});
     // reply(require('fs').createReadStream(__filename));
     // reply(new Error('oops'));
-    reply(Boom.notFound());
+    // reply(Boom.notFound());
+
+    // can modify the response header
+    // resp object is chainable
+    reply('hello world')
+        .code(418)
+        .type('text-plain')
+        .header('hello', 'world')
+        // set cookie header
+        .state('hello', 'world');
 }
 
 let goodOptions = {
